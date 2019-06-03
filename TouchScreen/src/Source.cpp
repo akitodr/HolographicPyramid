@@ -1,4 +1,4 @@
-#include "src/Window.h"
+#include "Window.h"
 
 int main(int argc, char* args[])
 {

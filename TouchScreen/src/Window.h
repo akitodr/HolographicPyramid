@@ -1,5 +1,6 @@
 #include <SDL.h>
-#include "Button.h"
+#include "Thumb.h"
+#include <string>
 
 class Window {
 
@@ -7,7 +8,7 @@ private:
 	//The window we'll be rendering to
 	SDL_Window* window = NULL;
 	SDL_Renderer* canvas = NULL;
-	Button* button;
+	Thumb* thumb;
 	const char* title;
 
 
@@ -22,4 +23,6 @@ public:
 	void close();
 
 	SDL_Renderer* getCanvas() const;
+	
+	
 };

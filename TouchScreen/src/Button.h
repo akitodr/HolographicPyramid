@@ -5,6 +5,7 @@ class Button {
 private:
 	int pos_x, pos_y, width, height;
 	bool isDown;
+	SDL_Surface circle;
 
 public:
 	Button(int posX, int posY, int w, int h);
@@ -12,6 +13,4 @@ public:
 	void update();
 	void draw(SDL_Renderer* canvas);
 	void deinit();
-	bool isHovered(SDL_Event* e);
-
 };
