@@ -10,6 +10,11 @@ private:
 	Command* motion;
 	Command* wheel;
 
+	Command* touchDown;
+	Command* touchHold;
+	Command* touchUp;
+	Command* touchMove;
+
 	bool mouseDown;
 
 	InputHandler();

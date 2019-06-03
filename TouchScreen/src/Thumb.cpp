@@ -79,6 +79,43 @@ void Thumb::onMouseButtonUp()
 	inputVector.y = 0;
 }
 
+void Thumb::onTouchHold(const Vec2& fingerPos)
+{
+	int w, h;
+	SDL_GetRendererOutputSize(canvas, &w, &h);
+	Vec2 center(w / 2, h / 2);
+
+	Vec2 direction = fingerPos - center;
+
+	double magnitude = direction.Magnitude();
+	if (magnitude > radius)
+	{
+		double percentage = radius / magnitude;
+		direction.x *= percentage;
+		direction.y *= percentage;
+	}
+
+	joystickRect->x = center.x + direction.x - joystickRadius;
+	joystickRect->y = center.y + direction.y - joystickRadius;
+
+	//get Input Vector
+	inputVector.x = direction.x / radius;
+	inputVector.y = direction.y / radius;
+}
+
+void Thumb::onTouchUp(const Vec2& fingerPos)
+{
+	int w, h;
+
+	SDL_GetRendererOutputSize(canvas, &w, &h);
+
+	joystickRect->x = w / 2 - joystickRadius;
+	joystickRect->y = h / 2 - joystickRadius;
+
+	inputVector.x = 0;
+	inputVector.y = 0;
+}
+
 void Thumb::draw()
 {
 	SDL_SetTextureAlphaMod(circle, 0x99);

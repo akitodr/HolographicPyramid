@@ -27,4 +27,7 @@ public:
 
 	void onMouseButtonHold();
 	void onMouseButtonUp();
+
+	void onTouchHold(const Vec2& fingerPos);
+	void onTouchUp(const Vec2& fingerPos);
 };
