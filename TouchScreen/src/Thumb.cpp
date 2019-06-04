@@ -1,6 +1,7 @@
 #include "Thumb.h"
 #include <SDL_image.h>
 #include "InputHandler.h"
+#include "ImageLoader.h"
 
 Thumb::Thumb(float radius)
 {
@@ -135,40 +136,13 @@ void Thumb::deinit()
 	joystickRect = NULL;
 }
 
-SDL_Texture* Thumb::loadTexture(std::string path)
-{
-	//The final texture
-	SDL_Texture* newTexture = NULL;
-
-	//Load image at specified path
-	SDL_Surface* loadedSurface = IMG_Load(path.c_str());
-	if (loadedSurface == NULL)
-	{
-		printf("Unable to load image %s! SDL_image Error: %s\n", path.c_str(), IMG_GetError());
-	}
-	else
-	{
-		//Create texture from surface pixels
-		newTexture = SDL_CreateTextureFromSurface(canvas, loadedSurface);
-		if (newTexture == NULL)
-		{
-			printf("Unable to create texture from %s! SDL Error: %s\n", path.c_str(), SDL_GetError());
-		}
-
-		//Get rid of old loaded surface
-		SDL_FreeSurface(loadedSurface);
-	}
-
-	return newTexture;
-}
-
 bool Thumb::loadMedia()
 {
 	//Loading success flag
 	bool success = true;
 
 	//Load PNG texture
-	circle = loadTexture("circle.png");
+	circle = loadTexture(canvas, "circle.png");
 	if (circle == NULL)
 	{
 		printf("Failed to load texture image!\n");

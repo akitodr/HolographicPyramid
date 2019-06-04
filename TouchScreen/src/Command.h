@@ -59,6 +59,8 @@ public:
 	}
 };
 
+//MOUSE
+
 class DownCommand : public Command
 {
 public:

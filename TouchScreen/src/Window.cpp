@@ -3,6 +3,7 @@
 #include <SDL_image.h>
 #include "InputHandler.h"
 
+
 Window::Window(const char* title) : title(title) {}
 
 Window::Window() : Window("TouchPad") {}
@@ -51,6 +52,8 @@ void Window::init()
 
 	thumb = new Thumb(300);
 	thumb->init(canvas);
+	object = new ScannedObject(canvas, "vader\\");
+	object->init();
 }
 
 void Window::loop() {
@@ -73,17 +76,14 @@ void Window::loop() {
 		//Clear screen
 		SDL_RenderClear(canvas);
 
-		//SDL_SetRenderDrawColor(canvas, 0xFF, 0xFF, 0xFF, 0xFF);
-		//SDL_Rect fillRect = { 1366 / 4, 768 / 4, 1366 / 2, 768 / 2 };
-		thumb->update();
-		thumb->draw();
-		std::cout << thumb->getInputVector().x << ", " << thumb->getInputVector().y << std::endl;
+		//thumb->update();
+		//thumb->draw();
 
-		//[Render red filled quad
-		/*SDL_SetRenderDrawColor(canvas, 0xFF, 0x00, 0x00, 0xFF);
-		SDL_RenderFillRect(canvas, &fillRect);*/
+		object->update(secs);
+		object->draw();
 
 		SDL_RenderPresent(canvas);
+
 		//Handle events on queue
 		while (SDL_PollEvent(&e) != 0)
 		{
@@ -97,6 +97,7 @@ void Window::loop() {
 		}
 	}
 	thumb->deinit();
+	object->deinit();
 	close();
 }
 
@@ -105,8 +106,12 @@ void Window::close() {
 	//Destroy window
 	SDL_DestroyRenderer(canvas);
 	SDL_DestroyWindow(window);
+	delete thumb;
+	delete object;
 	canvas = NULL;
 	window = NULL;
+	thumb = NULL;
+	object = NULL;
 
 	//Quit SDL subsystems
 	IMG_Quit();

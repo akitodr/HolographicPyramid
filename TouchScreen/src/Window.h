@@ -1,6 +1,7 @@
 #include <SDL.h>
 #include "Thumb.h"
 #include <string>
+#include "ScannedObject.h"
 
 class Window {
 
@@ -9,6 +10,7 @@ private:
 	SDL_Window* window = NULL;
 	SDL_Renderer* canvas = NULL;
 	Thumb* thumb;
+	ScannedObject* object;
 	const char* title;
 
 

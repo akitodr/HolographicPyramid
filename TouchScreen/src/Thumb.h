@@ -21,7 +21,6 @@ public:
 	void update();
 	void draw();
 	void deinit();
-	SDL_Texture* loadTexture(std::string path);
 	bool loadMedia();
 	Vec2 getInputVector() const;
 

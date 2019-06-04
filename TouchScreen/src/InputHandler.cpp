@@ -40,7 +40,6 @@ void InputHandler::handleInput(const SDL_Event& event) {
 	else if (event.type == SDL_MOUSEMOTION) { motion->execute(); }
 	else if (event.type == SDL_MOUSEWHEEL) { wheel->execute(); }
 
-
 	//TOUCH
 	if (event.type == SDL_FINGERDOWN) {
 		Vec2 touchPos(event.tfinger.x, event.tfinger.y);
