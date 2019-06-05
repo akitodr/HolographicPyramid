@@ -26,4 +26,5 @@ public:
 	void deinit();
 	SDL_Texture* getImageFromAngle();
 	void incrementAngle(const Vec2& increment);
+	ScannedObject* getActualObject();
 };

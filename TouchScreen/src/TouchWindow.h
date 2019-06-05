@@ -1,7 +1,9 @@
 #include <SDL.h>
+#include <SDL_thread.h>
 #include "Thumb.h"
-#include <string>
 #include "ScannedObject.h"
+#include "Window.h"
+
 
 class TouchWindow {
 
@@ -11,6 +13,7 @@ private:
 	SDL_Renderer* canvas = NULL;
 	Thumb* thumb;
 	ScannedObject* object;
+	SDL_Thread* thread;
 	const char* title;
 
 
@@ -25,4 +28,7 @@ public:
 	void close();
 
 	SDL_Renderer* getCanvas() const;
+
+	ScannedObject* getActualObject();
+
 };

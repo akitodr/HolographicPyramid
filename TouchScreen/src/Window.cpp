@@ -52,7 +52,7 @@ void Window::init()
 
 	setupRect();
 
-	object = new ScannedObject(canvas, "vader\\");
+	//object = new ScannedObject(canvas, "vader\\");
 	object->init();
 }
 
@@ -140,4 +140,9 @@ void Window::setupRect()
 
 	pivot.x = rect.w / 2;
 	pivot.y = h - blankSpot /2;
+}
+
+void Window::setObject(ScannedObject * object)
+{
+	this->object = object;
 }

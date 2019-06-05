@@ -80,3 +80,8 @@ void ScannedObject::incrementAngle(const Vec2& increment)
 	if (angle.y >= 360) angle.y = angle.y - 360;
 	if (angle.y < 0) angle.y = angle.y + 360;
 }
+
+ScannedObject* ScannedObject::getActualObject()
+{
+	return this;
+}

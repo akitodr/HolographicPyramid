@@ -1,6 +1,4 @@
 #include <SDL.h>
-#include "Thumb.h"
-#include <string>
 #include "ScannedObject.h"
 
 class Window {
@@ -28,6 +26,7 @@ public:
 	SDL_Renderer* getCanvas() const;
 
 	void setupRect();
-	
+
+	void setObject(ScannedObject* object);
 	
 };

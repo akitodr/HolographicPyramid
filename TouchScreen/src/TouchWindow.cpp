@@ -2,11 +2,20 @@
 #include <stdio.h>
 #include <SDL_image.h>
 #include "InputHandler.h"
+//#include <SDL_thread.h>
 
 
 TouchWindow::TouchWindow(const char* title) : title(title) {}
 
 TouchWindow::TouchWindow() : TouchWindow("TouchPad") {}
+
+int runProjectionWindow(void * data)
+{
+	Window* window = new Window();
+	window->setObject((ScannedObject*)data);
+	window->loop();
+	return 0;
+}
 
 void TouchWindow::init()
 {
@@ -54,6 +63,7 @@ void TouchWindow::init()
 	thumb->init(canvas);
 	object = new ScannedObject(canvas, "vader\\");
 	object->init();
+	thread = SDL_CreateThread(runProjectionWindow, "Projection Window", getActualObject());
 }
 
 void TouchWindow::loop() {
@@ -99,6 +109,8 @@ void TouchWindow::loop() {
 			InputHandler::instance().handleInput(e);
 		}
 	}
+
+	SDL_WaitThread(thread, NULL);
 	thumb->deinit();
 	object->deinit();
 	close();
@@ -124,4 +136,9 @@ void TouchWindow::close() {
 SDL_Renderer* TouchWindow::getCanvas() const
 {
 	return canvas;
+}
+
+ScannedObject * TouchWindow::getActualObject()
+{
+	return object;
 }
