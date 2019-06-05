@@ -2,17 +2,20 @@
 #include <string>
 #include <SDL.h>
 #include <vector>
+#include "MathVectors.h"
 
-#define STREAM 16
+#define STREAM 15
 #define FRAME 60
 
 class ScannedObject {
 private:
 	std::string path;
 	SDL_Renderer* canvas;
-	SDL_Texture* images[FRAME][STREAM];
+	std::string imagesPath[FRAME][STREAM];
+	Vec2 position;
 
 	int imageIndex;
+	Vec2 angle;
 
 public:
 
@@ -21,4 +24,6 @@ public:
 	void update(float secs);
 	void draw();
 	void deinit();
+	SDL_Texture* getImageFromAngle();
+	void incrementAngle(const Vec2& increment);
 };

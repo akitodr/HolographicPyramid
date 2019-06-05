@@ -1,14 +1,14 @@
-#include "Window.h"
+#include "TouchWindow.h"
 #include <stdio.h>
 #include <SDL_image.h>
 #include "InputHandler.h"
 
 
-Window::Window(const char* title) : title(title) {}
+TouchWindow::TouchWindow(const char* title) : title(title) {}
 
-Window::Window() : Window("TouchPad") {}
+TouchWindow::TouchWindow() : TouchWindow("TouchPad") {}
 
-void Window::init()
+void TouchWindow::init()
 {
 	//Initialize SDL
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
@@ -24,7 +24,7 @@ void Window::init()
 		}
 
 		//Create window
-		window = SDL_CreateWindow(title, 0, 0, 1920, 1080, SDL_WINDOW_BORDERLESS);
+		window = SDL_CreateWindow(title, -1920, 0, 1920, 1080, SDL_WINDOW_BORDERLESS);
 		if (window == NULL)
 		{
 			printf("Window could not be created! SDL Error: %s\n", SDL_GetError());
@@ -50,13 +50,13 @@ void Window::init()
 		}
 	}
 
-	setupRect();
-
+	thumb = new Thumb(200, Vec2(1920 - 300, 1080 - 300));
+	thumb->init(canvas);
 	object = new ScannedObject(canvas, "vader\\");
 	object->init();
 }
 
-void Window::loop() {
+void TouchWindow::loop() {
 	//Main loop flag
 	bool quit = false;
 
@@ -77,17 +77,14 @@ void Window::loop() {
 		SDL_RenderClear(canvas);
 
 
-		//object->incrementAngle(Vec2(thumb->getInputVector().x, -thumb->getInputVector().y) * 10);
+		thumb->update();
+
+		object->incrementAngle(Vec2(thumb->getInputVector().x, -thumb->getInputVector().y) * 10);
 		object->update(secs);
+		object->draw();
 
+		thumb->draw();
 
-		SDL_Texture* texture = object->getImageFromAngle();
-		SDL_RenderCopyEx(canvas, texture, NULL, &rect, 0, &pivot, SDL_RendererFlip::SDL_FLIP_VERTICAL);
-		SDL_RenderCopyEx(canvas, texture, NULL, &rect, -90, &pivot, SDL_RendererFlip::SDL_FLIP_VERTICAL);
-		SDL_RenderCopyEx(canvas, texture, NULL, &rect, 90, &pivot, SDL_RendererFlip::SDL_FLIP_VERTICAL);
-		
-
-		//thumb->draw();
 		SDL_RenderPresent(canvas);
 
 		//Handle events on queue
@@ -102,18 +99,21 @@ void Window::loop() {
 			InputHandler::instance().handleInput(e);
 		}
 	}
+	thumb->deinit();
 	object->deinit();
 	close();
 }
 
-void Window::close() {
+void TouchWindow::close() {
 
 	//Destroy window
 	SDL_DestroyRenderer(canvas);
 	SDL_DestroyWindow(window);
+	delete thumb;
 	delete object;
 	canvas = NULL;
 	window = NULL;
+	thumb = NULL;
 	object = NULL;
 
 	//Quit SDL subsystems
@@ -121,23 +121,7 @@ void Window::close() {
 	SDL_Quit();
 }
 
-SDL_Renderer* Window::getCanvas() const
+SDL_Renderer* TouchWindow::getCanvas() const
 {
 	return canvas;
-}
-
-void Window::setupRect()
-{
-	int w, h;
-	SDL_GetRendererOutputSize(canvas, &w, &h);
-
-	float blankSpot = h * 0.34;
-	
-	rect.x = (w * 0.5) - blankSpot/2;
-	rect.y = 0;
-	rect.w = blankSpot;
-	rect.h = h - blankSpot;
-
-	pivot.x = rect.w / 2;
-	pivot.y = h - blankSpot /2;
 }

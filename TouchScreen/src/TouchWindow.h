@@ -3,21 +3,20 @@
 #include <string>
 #include "ScannedObject.h"
 
-class Window {
+class TouchWindow {
 
 private:
 	//The window we'll be rendering to
 	SDL_Window* window = NULL;
 	SDL_Renderer* canvas = NULL;
-	SDL_Rect rect;
-	SDL_Point pivot;
+	Thumb* thumb;
 	ScannedObject* object;
 	const char* title;
 
 
 public:
-	Window(const char* title);
-	Window();
+	TouchWindow(const char* title);
+	TouchWindow();
 
 	void init();
 
@@ -26,8 +25,4 @@ public:
 	void close();
 
 	SDL_Renderer* getCanvas() const;
-
-	void setupRect();
-	
-	
 };

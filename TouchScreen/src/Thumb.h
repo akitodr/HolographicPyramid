@@ -12,11 +12,12 @@ private:
 	SDL_Rect* backgroundRect;
 	SDL_Rect* joystickRect;
 	Vec2 inputVector;
+	Vec2 position;
 	
 	float radius;
 	float joystickRadius;
 public:
-	Thumb(float radius);
+	Thumb(float radius, const Vec2& pos);
 	void init(SDL_Renderer* canvas);
 	void update();
 	void draw();

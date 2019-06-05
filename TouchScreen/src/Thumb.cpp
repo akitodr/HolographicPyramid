@@ -3,10 +3,11 @@
 #include "InputHandler.h"
 #include "ImageLoader.h"
 
-Thumb::Thumb(float radius)
+Thumb::Thumb(float radius, const Vec2& pos)
 {
 	this->radius = radius;
 	joystickRadius = radius * .5f;
+	position = pos;
 }
 
 void Thumb::init(SDL_Renderer* canvas)
@@ -22,14 +23,14 @@ void Thumb::init(SDL_Renderer* canvas)
 	backgroundRect = new SDL_Rect();
 	backgroundRect->w = radius * 2;
 	backgroundRect->h = radius * 2;
-	backgroundRect->x = w / 2 - radius;
-	backgroundRect->y = h / 2 - radius;
+	backgroundRect->x = position.x - radius;
+	backgroundRect->y = position.y - radius;
 
 	joystickRect = new SDL_Rect();
 	joystickRect->w = joystickRadius * 2;
 	joystickRect->h = joystickRadius * 2;
-	joystickRect->x = w / 2 - joystickRadius;
-	joystickRect->y = h / 2 - joystickRadius;
+	joystickRect->x = position.x - joystickRadius;
+	joystickRect->y = position.y - joystickRadius;
 
 	InputHandler::instance().addListener(this);
 }
@@ -45,11 +46,7 @@ void Thumb::onMouseButtonHold()
 	SDL_GetMouseState(&mouseX, &mouseY);
 	Vec2 mousePos(mouseX, mouseY);
 
-	int w, h;
-	SDL_GetRendererOutputSize(canvas, &w, &h);
-	Vec2 center(w / 2, h / 2);
-
-	Vec2 direction = mousePos - center;
+	Vec2 direction = mousePos - position;
 
 	double magnitude = direction.Magnitude();
 	if (magnitude > radius)
@@ -59,8 +56,8 @@ void Thumb::onMouseButtonHold()
 		direction.y *= percentage;
 	}
 
-	joystickRect->x = center.x + direction.x - joystickRadius;
-	joystickRect->y = center.y + direction.y - joystickRadius;
+	joystickRect->x = position.x + direction.x - joystickRadius;
+	joystickRect->y = position.y + direction.y - joystickRadius;
 
 	//get Input Vector
 	inputVector.x = direction.x / radius;
@@ -69,12 +66,8 @@ void Thumb::onMouseButtonHold()
 
 void Thumb::onMouseButtonUp()
 {
-	int w, h;
-
-	SDL_GetRendererOutputSize(canvas, &w, &h);
-
-	joystickRect->x = w / 2 - joystickRadius;
-	joystickRect->y = h / 2 - joystickRadius;
+	joystickRect->x = position.x - joystickRadius;
+	joystickRect->y = position.y - joystickRadius;
 
 	inputVector.x = 0;
 	inputVector.y = 0;
@@ -82,39 +75,35 @@ void Thumb::onMouseButtonUp()
 
 void Thumb::onTouchHold(const Vec2& fingerPos)
 {
-	int w, h;
-	SDL_GetRendererOutputSize(canvas, &w, &h);
-	Vec2 center(w / 2, h / 2);
+	//Vec2 direction = fingerPos - position;
 
-	Vec2 direction = fingerPos - center;
+	//double magnitude = direction.Magnitude();
+	//if (magnitude > radius)
+	//{
+	//	double percentage = radius / magnitude;
+	//	direction.x *= percentage;
+	//	direction.y *= percentage;
+	//}
 
-	double magnitude = direction.Magnitude();
-	if (magnitude > radius)
-	{
-		double percentage = radius / magnitude;
-		direction.x *= percentage;
-		direction.y *= percentage;
-	}
+	//joystickRect->x = position.x + direction.x - joystickRadius;
+	//joystickRect->y = position.y + direction.y - joystickRadius;
 
-	joystickRect->x = center.x + direction.x - joystickRadius;
-	joystickRect->y = center.y + direction.y - joystickRadius;
-
-	//get Input Vector
-	inputVector.x = direction.x / radius;
-	inputVector.y = direction.y / radius;
+	////get Input Vector
+	//inputVector.x = direction.x / radius;
+	//inputVector.y = direction.y / radius;
 }
 
 void Thumb::onTouchUp(const Vec2& fingerPos)
 {
-	int w, h;
+	/*int w, h;
 
 	SDL_GetRendererOutputSize(canvas, &w, &h);
 
-	joystickRect->x = w / 2 - joystickRadius;
-	joystickRect->y = h / 2 - joystickRadius;
+	joystickRect->x = position.x - joystickRadius;
+	joystickRect->y = position.y - joystickRadius;
 
 	inputVector.x = 0;
-	inputVector.y = 0;
+	inputVector.y = 0;*/
 }
 
 void Thumb::draw()
