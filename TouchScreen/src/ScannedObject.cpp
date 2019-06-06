@@ -33,7 +33,7 @@ void ScannedObject::draw()
 
 void ScannedObject::deinit()
 {
-
+	SDL_DestroyTexture(currentTexture);
 }
 
 SDL_Texture * ScannedObject::getImageFromAngle()

@@ -16,6 +16,8 @@ public:
 	void update();
 	void draw();
 	void deinit();
+	Vec2 getTextureSize();
+	void setPosition(const Vec2& pos);
 
 	void onMouseButtonDown();
 

@@ -24,7 +24,7 @@ void Window::init()
 		}
 
 		//Create window
-		window = SDL_CreateWindow(title, 1921, 0, 1920, 1080, SDL_WINDOW_BORDERLESS);
+		window = SDL_CreateWindow(title, 1920, 0, 1920, 1080, SDL_WINDOW_BORDERLESS);
 		if (window == NULL)
 		{
 			printf("Window could not be created! SDL Error: %s\n", SDL_GetError());
@@ -55,49 +55,55 @@ void Window::init()
 	object = new ScannedObject(canvas);
 	object->init();
 	setupRect();
+	time = SDL_GetTicks();
 }
 
 void Window::loop() {
-	//Main loop flag
-	bool quit = false;
+	
+}
 
-	SDL_Event e;
+void Window::update()
+{
+	float secs = (SDL_GetTicks() - time) / 1000;
+	time = SDL_GetTicks();
 
-	//init();
+	//F64740
+	SDL_SetRenderDrawColor(canvas, 0x00, 0x00, 0x00, 0xFF);
+	//Clear screen
+	SDL_RenderClear(canvas);
 
-	float time = SDL_GetTicks();
-
-	//While application is running
-	while (!quit)
-	{
-		float secs = (SDL_GetTicks() - time) / 1000;
-		time = SDL_GetTicks();
-
-		//F64740
-		SDL_SetRenderDrawColor(canvas, 0x00, 0x00, 0x00, 0xFF);
-		//Clear screen
-		SDL_RenderClear(canvas);
-
-		object->incrementAngle(Vec2(thumb->getInputVector().x, -thumb->getInputVector().y) * 100 * secs);
-		object->update(secs);
-
-		SDL_Texture* texture = object->getCurrentTexture();
-		SDL_RenderCopyEx(canvas, texture, NULL, &rect, 0, &pivot, SDL_RendererFlip::SDL_FLIP_VERTICAL);
-		SDL_RenderCopyEx(canvas, texture, NULL, &rect, -90, &pivot, SDL_RendererFlip::SDL_FLIP_VERTICAL);
-		SDL_RenderCopyEx(canvas, texture, NULL, &rect, 90, &pivot, SDL_RendererFlip::SDL_FLIP_VERTICAL);
-
-		/*SDL_SetRenderDrawColor(canvas, 0xFF, 0x00, 0x00, 0xFF);
-		SDL_RenderSetScale(canvas, 10,10);
-		SDL_RenderDrawPoint(canvas, pivot.x, pivot.y);*/
-
-		//thumb->draw();
-		SDL_RenderPresent(canvas);
+	Vec2 inputVector = Vec2(thumb->getInputVector().x, -thumb->getInputVector().y);
+	if (inputVector.x == 0 && inputVector.y == 0) {
+		delayCounter += secs;
 	}
-	object->deinit();
-	close();
+	else {
+		object->incrementAngle(Vec2(thumb->getInputVector().x, -thumb->getInputVector().y) * 100 * secs);
+		delayCounter = 0;
+	}
+
+	if (delayCounter >= animationDelay) {
+		object->incrementAngle(Vec2(0.5, 0) * 100 * secs);
+	}
+
+
+	//object->incrementAngle(Vec2(thumb->getInputVector().x, -thumb->getInputVector().y) * 100 * secs);
+	object->update(secs);
+
+	SDL_Texture * texture = object->getCurrentTexture();
+	SDL_RenderCopyEx(canvas, texture, NULL, &rect, 0, &pivot, SDL_RendererFlip::SDL_FLIP_VERTICAL);
+	SDL_RenderCopyEx(canvas, texture, NULL, &rect, -90, &pivot, SDL_RendererFlip::SDL_FLIP_VERTICAL);
+	SDL_RenderCopyEx(canvas, texture, NULL, &rect, 90, &pivot, SDL_RendererFlip::SDL_FLIP_VERTICAL);
+
+	/*SDL_SetRenderDrawColor(canvas, 0xFF, 0x00, 0x00, 0xFF);
+	SDL_RenderSetScale(canvas, 10,10);
+	SDL_RenderDrawPoint(canvas, pivot.x, pivot.y);*/
+
+	//thumb->draw();
+	SDL_RenderPresent(canvas);
 }
 
 void Window::close() {
+	object->deinit();
 
 	//Destroy window
 	SDL_DestroyRenderer(canvas);
@@ -127,7 +133,7 @@ void Window::setupRect()
 
 	float proportion = (float)imgW / imgH;
 
-	float blankSpot = h * 0.34;
+	float blankSpot = h * 0.50;
 
 	float yOffset = -h * 0.02f;
 

@@ -13,6 +13,9 @@ private:
 	ScannedObject* object;
 	Thumb* thumb;
 	const char* title;
+	float time;
+
+	float animationDelay = 5, delayCounter = 0;
 
 public:
 	Window(const char* title);
@@ -21,6 +24,8 @@ public:
 	void init();
 
 	void loop();
+
+	void update();
 
 	void close();
 

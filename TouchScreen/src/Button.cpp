@@ -36,6 +36,19 @@ void Button::deinit()
 {
 }
 
+Vec2 Button::getTextureSize()
+{
+	int imageW, imageH;
+	SDL_QueryTexture(texture, NULL, NULL, &imageW, &imageH);
+	return Vec2(rect.w, rect.h);
+}
+
+void Button::setPosition(const Vec2& pos)
+{
+	rect.x = pos.x;
+	rect.y = pos.y;
+}
+
 void Button::onMouseButtonDown()
 {
 	int x, y;

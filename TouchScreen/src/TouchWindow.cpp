@@ -10,7 +10,7 @@ TouchWindow::TouchWindow() : TouchWindow("TouchPad") {}
 
 int runProjectionWindow(void * data)
 {
-	((Window*)data)->loop();
+	((Window*)data)->update();
 	return 0;
 }
 
@@ -56,8 +56,14 @@ void TouchWindow::init()
 		}
 	}
 
-	std::string path = "vader\\";
-	thumb = new Thumb(200, Vec2(1920 - 300, 1080 - 300));
+	incrementFolder = 0;
+	defFolders();
+
+	int w, h;
+	SDL_GetRendererOutputSize(canvas, &w, &h);
+
+	std::string path = folders[incrementFolder];
+	thumb = new Thumb(300, Vec2((w * 0.5) + 450, (h * 0.5)));
 	thumb->init(canvas);
 	object = new ScannedObject(canvas);
 	object->setupImages(path);
@@ -67,15 +73,17 @@ void TouchWindow::init()
 	projectionWindow->init();
 	projectionWindow->setThumb(thumb);
 	projectionWindow->setObjectPath(path);
-	thread = SDL_CreateThread(runProjectionWindow, "Projection Window", projectionWindow);
-
-	rightButton = new Button(canvas, 300,50,50,50, true);
-	rightButton->init();
-
-	leftButton = new Button(canvas, 50, 50, 50, 50, false);
-	leftButton->init();
+	
 
 	defViewPort();
+	
+	rightButton = new Button(canvas, 0, 0, 100, 100, true);
+	rightButton->init();
+	rightButton->setPosition(Vec2((viewPort.x + viewPort.w) - rightButton->getTextureSize().x, viewPort.y));
+
+	leftButton = new Button(canvas, viewPort.x, viewPort.y, 100, 100, false);
+	leftButton->init();
+
 }
 
 void TouchWindow::loop() {
@@ -86,6 +94,8 @@ void TouchWindow::loop() {
 
 	init();
 
+	float animationDelay = 5, delayCounter = 0;
+
 	float time = SDL_GetTicks();
 
 	//While application is running
@@ -94,6 +104,8 @@ void TouchWindow::loop() {
 		float secs = (SDL_GetTicks() - time) / 1000;
 		time = SDL_GetTicks();
 
+		thread = SDL_CreateThread(runProjectionWindow, "Projection Window", projectionWindow);
+
 		InputHandler::instance().update();
 
 		//F64740
@@ -101,11 +113,21 @@ void TouchWindow::loop() {
 		//Clear screen
 		SDL_RenderClear(canvas);
 
-
 		thumb->update();
 
 		SDL_RenderSetViewport(canvas, &viewPort);
-		object->incrementAngle(Vec2(thumb->getInputVector().x, -thumb->getInputVector().y) * 100 * secs);
+		Vec2 inputVector = Vec2(thumb->getInputVector().x, -thumb->getInputVector().y);
+		if (inputVector.x == 0 && inputVector.y == 0) {
+			delayCounter += secs;
+		}
+		else {
+			object->incrementAngle(Vec2(thumb->getInputVector().x, -thumb->getInputVector().y) * 100 * secs);
+			delayCounter = 0;
+		}
+
+		if (delayCounter >= animationDelay) {
+			object->incrementAngle(Vec2(0.5, 0) * 100 * secs);
+		}
 		object->update(secs);
 		//object->draw();
 
@@ -116,18 +138,11 @@ void TouchWindow::loop() {
 		SDL_RenderSetViewport(canvas, NULL);
 		thumb->draw();
 
-		rightButton->update();
-		leftButton->update();
-
 		rightButton->draw();
 		leftButton->draw();
 
-		if (rightButton->isClicked())
-			std::cout << "Clicked Right" << std::endl;
-
-		if (leftButton->isClicked())
-			std::cout << "Clicked Left" << std::endl;
-
+		rightButton->update();
+		leftButton->update();
 
 		SDL_RenderPresent(canvas);
 
@@ -142,11 +157,38 @@ void TouchWindow::loop() {
 
 			InputHandler::instance().handleInput(e);
 		}
+
+		if (rightButton->isClicked()) {
+			std::cout << "Clicked Right" << std::endl;
+
+			incrementFolder++;
+			if (incrementFolder > 4)
+				incrementFolder = 0;
+
+			object->setupImages(folders[incrementFolder]);
+			//SDL_WaitThread(thread, NULL);
+			projectionWindow->setObjectPath(folders[incrementFolder]);
+		}
+
+		if (leftButton->isClicked()) {
+			std::cout << "Clicked Left" << std::endl;
+
+			incrementFolder--;
+			if (incrementFolder < 0)
+				incrementFolder = 4;
+
+			object->setupImages(folders[incrementFolder]);
+			//SDL_WaitThread(thread, NULL);
+			projectionWindow->setObjectPath(folders[incrementFolder]);
+		}
+
+		SDL_WaitThread(thread, NULL);
 	}
 
 	SDL_WaitThread(thread, NULL);
 	thumb->deinit();
 	object->deinit();
+	projectionWindow->close();
 	close();
 }
 
@@ -155,12 +197,19 @@ void TouchWindow::close() {
 	//Destroy window
 	SDL_DestroyRenderer(canvas);
 	SDL_DestroyWindow(window);
+	delete object;
 	delete thumb;
 	delete object;
+	delete projectionWindow;
+	delete rightButton;
+	delete leftButton;
 	canvas = NULL;
 	window = NULL;
 	thumb = NULL;
 	object = NULL;
+	projectionWindow = NULL;
+	rightButton = NULL;
+	leftButton = NULL;
 
 	//Quit SDL subsystems
 	IMG_Quit();
@@ -190,4 +239,13 @@ void TouchWindow::defViewPort()
 	objectRect.h = objectRect.w * (imgH / imgW);
 	objectRect.y = viewPort.h / 2 - objectRect.h / 2;
 
+}
+
+void TouchWindow::defFolders()
+{
+	folders[0] = "vader\\";
+	folders[1] = "cranio\\";
+	folders[2] = "testa\\";
+	folders[3] = "meio\\";
+	folders[4] = "maxilar\\";
 }

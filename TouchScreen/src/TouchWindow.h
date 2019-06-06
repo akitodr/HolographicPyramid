@@ -21,6 +21,9 @@ private:
 	Window* projectionWindow;
 	Button* rightButton;
 	Button* leftButton;
+	std::string folders[5];
+
+	int incrementFolder;
 
 public:
 	TouchWindow(const char* title);
@@ -35,4 +38,5 @@ public:
 	SDL_Renderer* getCanvas() const;
 	
 	void defViewPort();
+	void defFolders();
 };
