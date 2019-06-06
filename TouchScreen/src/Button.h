@@ -1,16 +1,23 @@
 #pragma once
 #include <SDL.h>
+#include "EventListener.h"
 
-class Button {
+class Button : public EventListener {
 private:
-	int pos_x, pos_y, width, height;
-	bool isDown;
-	SDL_Surface circle;
+	SDL_Rect rect;
+	SDL_Renderer* canvas;
+	SDL_Texture* texture;
+	bool clicked;
+	bool right;
 
 public:
-	Button(int posX, int posY, int w, int h);
+	Button(SDL_Renderer* canvas, int posX, int posY, int w, int h, bool right);
 	void init();
 	void update();
-	void draw(SDL_Renderer* canvas);
+	void draw();
 	void deinit();
+
+	void onMouseButtonDown();
+
+	bool isClicked();
 };

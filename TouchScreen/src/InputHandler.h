@@ -1,6 +1,7 @@
 #include <SDL.h>
 #include "Command.h"
 #include <vector>
+#include "MathVectors.h"
 
 class InputHandler {
 private:
@@ -14,6 +15,8 @@ private:
 	Command* touchHold;
 	Command* touchUp;
 	Command* touchMove;
+
+	Vec2 thumbPosition;
 
 	bool mouseDown;
 

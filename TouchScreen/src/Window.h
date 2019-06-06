@@ -1,5 +1,6 @@
 #include <SDL.h>
 #include "ScannedObject.h"
+#include "Thumb.h"
 
 class Window {
 
@@ -10,8 +11,8 @@ private:
 	SDL_Rect rect;
 	SDL_Point pivot;
 	ScannedObject* object;
+	Thumb* thumb;
 	const char* title;
-
 
 public:
 	Window(const char* title);
@@ -27,6 +28,7 @@ public:
 
 	void setupRect();
 
-	void setObject(ScannedObject* object);
-	
+	void setThumb(Thumb* thumb);
+
+	void setObjectPath(std::string path);
 };

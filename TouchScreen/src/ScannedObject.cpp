@@ -2,33 +2,13 @@
 #include "ImageLoader.h"
 #include <filesystem>
 #include <iostream>
+#include "Reader.h"
 
-ScannedObject::ScannedObject(SDL_Renderer* canvas, std::string path) 
-							: canvas(canvas), path(path) {}
+ScannedObject::ScannedObject(SDL_Renderer* canvas)
+	: canvas(canvas) {}
 
 void ScannedObject::init()
 {
-	int index = 0;
-	for (const auto& entry : std::filesystem::directory_iterator(path))
-	{
-		std::string path = entry.path().string();
-		std::string extension = path.substr(path.length() - 4);
-		if (extension != ".png")
-			continue;
-
-		int x = index % FRAME;
-		int y = index / FRAME;
-
-		std::cout << "(" << x << ", " << y << ") = " << entry.path().string() << std::endl;
-		imagesPath[x][y] = (path);
-		//images[x][y] = loadTexture(canvas, entry.path().string());
-
-		index++;
-	}
-
-	imageIndex = 0;
-	angle.x = 45;
-	angle.y = 45;
 }
 
 void ScannedObject::update(float secs)
@@ -38,8 +18,6 @@ void ScannedObject::update(float secs)
 
 void ScannedObject::draw()
 {
-	SDL_Texture* currentTexture = getImageFromAngle();
-
 	int imageW, imageH, w, h;
 	SDL_QueryTexture(currentTexture, NULL, NULL, &imageW, &imageH);
 	SDL_GetRendererOutputSize(canvas, &w, &h);
@@ -51,26 +29,26 @@ void ScannedObject::draw()
 	rect.h = h;
 
 	SDL_RenderCopy(canvas, currentTexture, NULL, &rect);
-
-	SDL_DestroyTexture(currentTexture);
-	currentTexture = NULL;
 }
 
 void ScannedObject::deinit()
 {
-	
+
 }
 
 SDL_Texture * ScannedObject::getImageFromAngle()
 {
-	int imgX = (FRAME - 1) * (angle.y / 360);
-	int imgY = (STREAM - 1) * (angle.x / 90);
+	int imgX = (frame - 1) * (angle.y / 360);
+	int imgY = (stream - 1) * (angle.x / 90);
 
-	return loadTexture(canvas, imagesPath[imgX][imgY]);
+	return loadTexture(canvas, imagePaths[imgX][imgY]);
 }
 
 void ScannedObject::incrementAngle(const Vec2& increment)
 {
+	int oldImgX = (frame - 1) * (angle.y / 360);
+	int oldImgY = (stream - 1) * (angle.x / 90);
+
 	angle.x += increment.y;
 	angle.y += increment.x;
 
@@ -79,9 +57,59 @@ void ScannedObject::incrementAngle(const Vec2& increment)
 
 	if (angle.y >= 360) angle.y = angle.y - 360;
 	if (angle.y < 0) angle.y = angle.y + 360;
+
+	int newImgX = (frame - 1) * (angle.y / 360);
+	int newImgY = (stream - 1) * (angle.x / 90);
+
+	if (oldImgX != newImgX || oldImgY != newImgY)
+	{
+		SDL_DestroyTexture(currentTexture);
+		currentTexture = getImageFromAngle();
+	}
+}
+
+SDL_Texture* ScannedObject::getCurrentTexture()
+{
+	return currentTexture;
 }
 
 ScannedObject* ScannedObject::getActualObject()
 {
 	return this;
+}
+
+void ScannedObject::setupImages(std::string path)
+{
+	this->path = path;
+	frame = readFile(path + "configf2s2.cfg", "Frames:");
+	stream = readFile(path + "configf2s2.cfg", "Streams:");
+
+	imagePaths.clear();
+
+	for (int i = 0; i < frame; i++)
+	{
+		std::vector<std::string> column(stream, " ");
+		imagePaths.push_back(column);
+	}
+
+	int index = 0;
+	for (const auto& entry : std::filesystem::directory_iterator(path))
+	{
+		std::string path = entry.path().string();
+		std::string extension = path.substr(path.length() - 4);
+		if (extension != ".png")
+			continue;
+
+		int x = index % frame;
+		int y = index / frame;
+
+		imagePaths.at(x).at(y) = (path);
+		index++;
+	}
+
+	imageIndex = 0;
+	angle.x = 45;
+	angle.y = 45;
+
+	currentTexture = getImageFromAngle();
 }

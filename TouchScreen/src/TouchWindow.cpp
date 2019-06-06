@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <SDL_image.h>
 #include "InputHandler.h"
-//#include <SDL_thread.h>
 
 
 TouchWindow::TouchWindow(const char* title) : title(title) {}
@@ -11,9 +10,7 @@ TouchWindow::TouchWindow() : TouchWindow("TouchPad") {}
 
 int runProjectionWindow(void * data)
 {
-	Window* window = new Window();
-	window->setObject((ScannedObject*)data);
-	window->loop();
+	((Window*)data)->loop();
 	return 0;
 }
 
@@ -33,7 +30,7 @@ void TouchWindow::init()
 		}
 
 		//Create window
-		window = SDL_CreateWindow(title, -1920, 0, 1920, 1080, SDL_WINDOW_BORDERLESS);
+		window = SDL_CreateWindow(title, 0, 0, 1920, 1080, SDL_WINDOW_BORDERLESS);
 		if (window == NULL)
 		{
 			printf("Window could not be created! SDL Error: %s\n", SDL_GetError());
@@ -59,11 +56,26 @@ void TouchWindow::init()
 		}
 	}
 
+	std::string path = "vader\\";
 	thumb = new Thumb(200, Vec2(1920 - 300, 1080 - 300));
 	thumb->init(canvas);
-	object = new ScannedObject(canvas, "vader\\");
+	object = new ScannedObject(canvas);
+	object->setupImages(path);
 	object->init();
-	thread = SDL_CreateThread(runProjectionWindow, "Projection Window", getActualObject());
+	
+	projectionWindow = new Window();
+	projectionWindow->init();
+	projectionWindow->setThumb(thumb);
+	projectionWindow->setObjectPath(path);
+	thread = SDL_CreateThread(runProjectionWindow, "Projection Window", projectionWindow);
+
+	rightButton = new Button(canvas, 300,50,50,50, true);
+	rightButton->init();
+
+	leftButton = new Button(canvas, 50, 50, 50, 50, false);
+	leftButton->init();
+
+	defViewPort();
 }
 
 void TouchWindow::loop() {
@@ -74,10 +86,13 @@ void TouchWindow::loop() {
 
 	init();
 
+	float time = SDL_GetTicks();
+
 	//While application is running
 	while (!quit)
 	{
-		float secs = SDL_GetTicks() / 1000.f;
+		float secs = (SDL_GetTicks() - time) / 1000;
+		time = SDL_GetTicks();
 
 		InputHandler::instance().update();
 
@@ -89,11 +104,30 @@ void TouchWindow::loop() {
 
 		thumb->update();
 
-		object->incrementAngle(Vec2(thumb->getInputVector().x, -thumb->getInputVector().y) * 10);
+		SDL_RenderSetViewport(canvas, &viewPort);
+		object->incrementAngle(Vec2(thumb->getInputVector().x, -thumb->getInputVector().y) * 100 * secs);
 		object->update(secs);
-		object->draw();
+		//object->draw();
 
+		SDL_RenderCopy(canvas, object->getCurrentTexture(), NULL, &objectRect);
+		SDL_SetRenderDrawColor(canvas, 0xFF, 0x00, 0x00, 0xFF);
+		SDL_RenderDrawRect(canvas, NULL);
+
+		SDL_RenderSetViewport(canvas, NULL);
 		thumb->draw();
+
+		rightButton->update();
+		leftButton->update();
+
+		rightButton->draw();
+		leftButton->draw();
+
+		if (rightButton->isClicked())
+			std::cout << "Clicked Right" << std::endl;
+
+		if (leftButton->isClicked())
+			std::cout << "Clicked Left" << std::endl;
+
 
 		SDL_RenderPresent(canvas);
 
@@ -138,7 +172,22 @@ SDL_Renderer* TouchWindow::getCanvas() const
 	return canvas;
 }
 
-ScannedObject * TouchWindow::getActualObject()
+void TouchWindow::defViewPort()
 {
-	return object;
+	int w, h;
+	SDL_GetRendererOutputSize(canvas, &w, &h);
+	viewPort.w = w * 0.4;
+	viewPort.h = h * 0.9;
+	viewPort.x = (h - viewPort.h) * 0.5;
+	viewPort.y = (h - viewPort.h) * 0.5;
+
+	int imgW, imgH;
+	SDL_QueryTexture(object->getCurrentTexture(), NULL, NULL, &imgW, &imgH);
+
+	float proportion = imgW / imgH;
+
+	objectRect.w = viewPort.w;
+	objectRect.h = objectRect.w * (imgH / imgW);
+	objectRect.y = viewPort.h / 2 - objectRect.h / 2;
+
 }

@@ -42,40 +42,11 @@ void Thumb::update()
 
 void Thumb::onMouseButtonHold()
 {
-	int mouseX, mouseY;
-	SDL_GetMouseState(&mouseX, &mouseY);
-	Vec2 mousePos(mouseX, mouseY);
+	//int mouseX, mouseY;
+	//SDL_GetMouseState(&mouseX, &mouseY);
+	//Vec2 mousePos(mouseX, mouseY);
 
-	Vec2 direction = mousePos - position;
-
-	double magnitude = direction.Magnitude();
-	if (magnitude > radius)
-	{
-		double percentage = radius / magnitude;
-		direction.x *= percentage;
-		direction.y *= percentage;
-	}
-
-	joystickRect->x = position.x + direction.x - joystickRadius;
-	joystickRect->y = position.y + direction.y - joystickRadius;
-
-	//get Input Vector
-	inputVector.x = direction.x / radius;
-	inputVector.y = direction.y / radius;
-}
-
-void Thumb::onMouseButtonUp()
-{
-	joystickRect->x = position.x - joystickRadius;
-	joystickRect->y = position.y - joystickRadius;
-
-	inputVector.x = 0;
-	inputVector.y = 0;
-}
-
-void Thumb::onTouchHold(const Vec2& fingerPos)
-{
-	//Vec2 direction = fingerPos - position;
+	//Vec2 direction = mousePos - position;
 
 	//double magnitude = direction.Magnitude();
 	//if (magnitude > radius)
@@ -93,17 +64,48 @@ void Thumb::onTouchHold(const Vec2& fingerPos)
 	//inputVector.y = direction.y / radius;
 }
 
-void Thumb::onTouchUp(const Vec2& fingerPos)
+void Thumb::onMouseButtonUp()
 {
-	/*int w, h;
-
-	SDL_GetRendererOutputSize(canvas, &w, &h);
-
-	joystickRect->x = position.x - joystickRadius;
+	/*joystickRect->x = position.x - joystickRadius;
 	joystickRect->y = position.y - joystickRadius;
 
 	inputVector.x = 0;
 	inputVector.y = 0;*/
+}
+
+void Thumb::onTouchHold(const Vec2 & fingerPos)
+{
+	int w, h;
+	SDL_GetRendererOutputSize(canvas, &w, &h);
+	Vec2 pos = fingerPos;
+	pos.x *= w;
+	pos.y *= h;
+
+	Vec2 direction = pos - position;
+
+	double magnitude = direction.Magnitude();
+	if (magnitude > radius)
+	{
+		double percentage = radius / magnitude;
+		direction.x *= percentage;
+		direction.y *= percentage;
+	}
+
+	joystickRect->x = position.x + direction.x - joystickRadius;
+	joystickRect->y = position.y + direction.y - joystickRadius;
+
+	//get Input Vector
+	inputVector.x = direction.x / radius;
+	inputVector.y = direction.y / radius;
+}
+
+void Thumb::onTouchUp(const Vec2 & fingerPos)
+{
+	joystickRect->x = position.x - joystickRadius;
+	joystickRect->y = position.y - joystickRadius;
+
+	inputVector.x = 0;
+	inputVector.y = 0;
 }
 
 void Thumb::draw()

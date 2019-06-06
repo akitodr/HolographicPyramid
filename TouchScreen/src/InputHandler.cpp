@@ -22,7 +22,7 @@ void InputHandler::update()
 {
 	if (mouseDown) {
 		hold->execute();
-		touchHold->execute();
+		touchHold->execute(thumbPosition);
 	}
 }
 
@@ -43,16 +43,19 @@ void InputHandler::handleInput(const SDL_Event& event) {
 	//TOUCH
 	if (event.type == SDL_FINGERDOWN) {
 		Vec2 touchPos(event.tfinger.x, event.tfinger.y);
+		thumbPosition = touchPos;
 		touchDown->execute(touchPos);
 		mouseDown = true;
 	}
 	else if (event.type == SDL_FINGERUP) {
 		Vec2 touchPos(event.tfinger.x, event.tfinger.y);
+		thumbPosition = touchPos;
 		touchUp->execute(touchPos);
 		mouseDown = false;
 	}
 	else if (event.type == SDL_FINGERMOTION) { 
 		Vec2 touchPos(event.tfinger.x, event.tfinger.y);
+		thumbPosition = touchPos;
 		touchMove->execute(touchPos); 
 	}
 

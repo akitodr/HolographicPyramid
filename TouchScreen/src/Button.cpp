@@ -1,33 +1,55 @@
 #include "Button.h"
 #include <stdio.h>
+#include "ImageLoader.h"
+#include "InputHandler.h"
 
-Button::Button(int posX, int posY, int w, int h)
-		: pos_x(posX), pos_y(posY), width(w), height(h) {}
+Button::Button(SDL_Renderer* canvas, int posX, int posY, int w, int h, bool right = true)
+{
+	this->canvas = canvas;
+	rect.x = posX;
+	rect.y = posY;
+	rect.w = w;
+	rect.h = h;
+	this->right = right;
+}
 
 void Button::init()
 {
-	
+	texture = loadTexture(canvas, "arrow.png");
+	InputHandler::instance().addListener(this);
 }
 
 void Button::update()
 {
-	
+	clicked = false;
 }
 
-void Button::draw(SDL_Renderer* canvas)
+void Button::draw()
 {
-
-	/*SDL_Rect fillRect = { 1366 / 4, 768 / 4, 1366 / 2, 768 / 2 };
-
-	if(isDown) SDL_SetRenderDrawColor(canvas, 0x74, 0x2A, 0x7F, 0xFF);
-	else SDL_SetRenderDrawColor(canvas, 0xFF, 0x00, 0x00, 0xFF);
-
-	SDL_RenderFillRect(canvas, &fillRect);*/
-
-
-
+	if(right)
+		SDL_RenderCopy(canvas, texture, NULL, &rect);
+	else
+		SDL_RenderCopyEx(canvas, texture, NULL, &rect, 0, NULL, SDL_RendererFlip::SDL_FLIP_HORIZONTAL);
 }
 
 void Button::deinit()
 {
+}
+
+void Button::onMouseButtonDown()
+{
+	int x, y;
+	SDL_GetMouseState(&x, &y);
+	SDL_Point mousePoint;
+	mousePoint.x = x;
+	mousePoint.y = y;
+	if (SDL_PointInRect(&mousePoint, &rect))
+	{
+		clicked = true;
+	}
+}
+
+bool Button::isClicked()
+{
+	return clicked;
 }

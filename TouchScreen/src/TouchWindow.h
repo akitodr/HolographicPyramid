@@ -3,6 +3,7 @@
 #include "Thumb.h"
 #include "ScannedObject.h"
 #include "Window.h"
+#include "Button.h"
 
 
 class TouchWindow {
@@ -14,8 +15,12 @@ private:
 	Thumb* thumb;
 	ScannedObject* object;
 	SDL_Thread* thread;
+	SDL_Rect viewPort;
+	SDL_Rect objectRect;
 	const char* title;
-
+	Window* projectionWindow;
+	Button* rightButton;
+	Button* leftButton;
 
 public:
 	TouchWindow(const char* title);
@@ -28,7 +33,6 @@ public:
 	void close();
 
 	SDL_Renderer* getCanvas() const;
-
-	ScannedObject* getActualObject();
-
+	
+	void defViewPort();
 };

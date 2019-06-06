@@ -24,7 +24,7 @@ void Window::init()
 		}
 
 		//Create window
-		window = SDL_CreateWindow(title, 0, 0, 1920, 1080, SDL_WINDOW_BORDERLESS);
+		window = SDL_CreateWindow(title, 1921, 0, 1920, 1080, SDL_WINDOW_BORDERLESS);
 		if (window == NULL)
 		{
 			printf("Window could not be created! SDL Error: %s\n", SDL_GetError());
@@ -50,10 +50,11 @@ void Window::init()
 		}
 	}
 
-	setupRect();
 
-	//object = new ScannedObject(canvas, "vader\\");
+
+	object = new ScannedObject(canvas);
 	object->init();
+	setupRect();
 }
 
 void Window::loop() {
@@ -62,45 +63,35 @@ void Window::loop() {
 
 	SDL_Event e;
 
-	init();
+	//init();
+
+	float time = SDL_GetTicks();
 
 	//While application is running
 	while (!quit)
 	{
-		float secs = SDL_GetTicks() / 1000.f;
-
-		InputHandler::instance().update();
+		float secs = (SDL_GetTicks() - time) / 1000;
+		time = SDL_GetTicks();
 
 		//F64740
 		SDL_SetRenderDrawColor(canvas, 0x00, 0x00, 0x00, 0xFF);
 		//Clear screen
 		SDL_RenderClear(canvas);
 
-
-		//object->incrementAngle(Vec2(thumb->getInputVector().x, -thumb->getInputVector().y) * 10);
+		object->incrementAngle(Vec2(thumb->getInputVector().x, -thumb->getInputVector().y) * 100 * secs);
 		object->update(secs);
 
-
-		SDL_Texture* texture = object->getImageFromAngle();
+		SDL_Texture* texture = object->getCurrentTexture();
 		SDL_RenderCopyEx(canvas, texture, NULL, &rect, 0, &pivot, SDL_RendererFlip::SDL_FLIP_VERTICAL);
 		SDL_RenderCopyEx(canvas, texture, NULL, &rect, -90, &pivot, SDL_RendererFlip::SDL_FLIP_VERTICAL);
 		SDL_RenderCopyEx(canvas, texture, NULL, &rect, 90, &pivot, SDL_RendererFlip::SDL_FLIP_VERTICAL);
-		
+
+		/*SDL_SetRenderDrawColor(canvas, 0xFF, 0x00, 0x00, 0xFF);
+		SDL_RenderSetScale(canvas, 10,10);
+		SDL_RenderDrawPoint(canvas, pivot.x, pivot.y);*/
 
 		//thumb->draw();
 		SDL_RenderPresent(canvas);
-
-		//Handle events on queue
-		while (SDL_PollEvent(&e) != 0)
-		{
-			//User requests quit (inputs)
-			if (e.type == SDL_QUIT)
-			{
-				quit = true;
-			}
-
-			InputHandler::instance().handleInput(e);
-		}
 	}
 	object->deinit();
 	close();
@@ -131,18 +122,31 @@ void Window::setupRect()
 	int w, h;
 	SDL_GetRendererOutputSize(canvas, &w, &h);
 
+	int imgW, imgH;
+	SDL_QueryTexture(object->getCurrentTexture(), NULL, NULL, &imgW, &imgH);
+
+	float proportion = (float)imgW / imgH;
+
 	float blankSpot = h * 0.34;
-	
-	rect.x = (w * 0.5) - blankSpot/2;
-	rect.y = 0;
-	rect.w = blankSpot;
+
+	float yOffset = -h * 0.02f;
+
 	rect.h = h - blankSpot;
+	rect.w = rect.h * proportion;
+	rect.x = (w * 0.5) - rect.w / 2;
+	rect.y = yOffset;
 
 	pivot.x = rect.w / 2;
-	pivot.y = h - blankSpot /2;
+	pivot.y = h - yOffset - blankSpot / 2;
 }
 
-void Window::setObject(ScannedObject * object)
+void Window::setThumb(Thumb* thumb)
 {
-	this->object = object;
+	this->thumb = thumb;
 }
+
+void Window::setObjectPath(std::string path)
+{
+	object->setupImages(path);
+}
+

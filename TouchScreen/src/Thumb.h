@@ -13,7 +13,7 @@ private:
 	SDL_Rect* joystickRect;
 	Vec2 inputVector;
 	Vec2 position;
-	
+
 	float radius;
 	float joystickRadius;
 public:
@@ -30,4 +30,5 @@ public:
 
 	void onTouchHold(const Vec2& fingerPos);
 	void onTouchUp(const Vec2& fingerPos);
+
 };
